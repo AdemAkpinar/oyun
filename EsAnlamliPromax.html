@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Eş Anlamlı Oyun PRO MAX</title>
+<style>
+body {
+    font-family: Arial;
+    text-align: center;
+    background: #eef7ff;
+    padding: 20px;
+}
+.kelime {
+    font-size: 40px;
+    margin: 25px;
+    font-weight: bold;
+}
+.cevap {
+    font-size: 26px;
+    color: green;
+    margin: 15px;
+}
+button {
+    padding: 10px 14px;
+    font-size: 15px;
+    margin: 4px;
+}
+.harfler {
+    margin: 10px;
+}
+.skor {
+    font-size: 18px;
+}
+.buyukButon {
+    display: block;
+    margin: 30px auto;
+    padding: 20px 40px;
+    font-size: 22px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<h2>Eş Anlamlı Oyun PRO MAX 🎯</h2>
+
+<div class="skor">
+⭐ Puan: <span id="puan">0</span> |
+❌ Yanlış: <span id="yanlis">0</span>
+</div>
+
+<select onchange="seviyeAyarla(this.value)">
+<option value="hepsi">Tümü</option>
+<option value="kolay">Kolay</option>
+<option value="orta">Orta</option>
+<option value="zor">Zor</option>
+</select>
+
+<div class="harfler" id="harfler"></div>
+
+<div class="kelime" id="kelime"></div>
+<div class="cevap" id="cevap"></div>
+
+<button onclick="kelimeOku()"hidden>🔊 Oku</button>
+<button onclick="konus()">🎤 Konuş</button>
+<button onclick="cevapGoster()">Cevabı Göster</button>
+<br>
+<button onclick="dogru()">✔️ Doğru</button>
+<button onclick="yanlisCevap()">❌ Yanlış</button>
+<button onclick="tekrarModu()">🧠 Yanlışları Tekrarla</button>
+
+<script>
+
+// 📚 TÜM LİSTE (çoklu cevap destekli)
+const tumKelimeler = [
+["Acemi",["Toy"]],
+["Ad",["İsim"]],
+["Akıllı",["Uslu"]],
+["Amaç",["Gaye","Hedef"]],
+["Anı",["Hatıra"]],
+["Anıt",["Abide"]],
+["Anlam",["Mana"]],
+["Armağan",["Hediye"]],
+["Asır",["Yüzyıl"]],
+["Basit",["Kolay"]],
+["Başvuru",["Müracaat"]],
+["Beyaz",["Ak"]],
+["Biçim",["Şekil"]],
+["Buluş",["İcat"]],
+["Büyük",["İri"]],
+["Cevap",["Yanıt"]],
+["Cümle",["Tümce"]],
+["Dert",["Üzüntü"]],
+["Doğa",["Tabiat"]],
+["Doktor",["Hekim"]],
+["Dünya",["Yerküre"]],
+["Düş",["Rüya"]],
+["Eksik",["Noksan"]],
+["Ev",["Konut"]],
+["Fakir",["Yoksul"]],
+["Fayda",["Yarar"]],
+["Fiil",["Eylem"]],
+["Gayret",["Çaba"]],
+["Gıda",["Besin"]],
+["Görev",["Vazife"]],
+["Güç",["Kuvvet"]],
+
+["Hakim",["Yargıç"]],
+["Hız",["Sürat"]],
+["Islak",["Yaş"]],
+["İhtiyar",["Yaşlı"]],
+["Şehir",["Kent"]],
+["İlave",["Ek"]],
+["İstek",["Arzu"]],
+["Kafa",["Baş"]],
+["Kalp",["Yürek"]],
+["Kanun",["Yasa"]],
+["Kırmızı",["Al"]],
+["Kibar",["Nazik"]],
+["Kişi",["Şahıs"]],
+["Kuşku",["Şüphe"]],
+["Macera",["Serüven"]],
+["Medeni",["Uygar"]],
+["Mekan",["Yer"]],
+["Misafir",["Konuk"]],
+["Nehir",["Irmak"]],
+["Okul",["Mektep"]],
+["Onarım",["Tamir"]],
+["Ozan",["Şair"]],
+["Öğrenci",["Talebe"]],
+["Öğretmen",["Muallim"]],
+["Öğüt",["Nasihat"]],
+["Önder",["Lider"]],
+["Öneri",["Teklif"]],
+["Önlem",["Tedbir"]],
+["Öykü",["Hikâye"]],
+["Özen",["İtina"]],
+["Özlem",["Hasret"]],
+
+["Özgürlük",["Hürriyet"]],
+["Problem",["Sorun"]],
+["Rüzgâr",["Yel"]],
+["Sağlık",["Sıhhat"]],
+["Savaş",["Harp","Cenk"]],
+["Sebep",["Neden"]],
+["Sevinç",["Neşe"]],
+["Sınav",["İmtihan"]],
+["Sınıf",["Derslik"]],
+["Siyah",["Kara"]],
+["Sonbahar",["Güz"]],
+["Soru",["Sual"]],
+["Sözcük",["Kelime"]],
+["Surat",["Yüz"]],
+["Süratli",["Hızlı"]],
+["Şart",["Koşul"]],
+["Tane",["Adet"]],
+["Tanık",["Şahit"]],
+["Ulus",["Millet"]],
+["Uyarı",["İkaz"]],
+["Uzak",["Irak"]],
+["Varlıklı",["Zengin"]],
+["Veteriner",["Baytar"]],
+["Yaşam",["Hayat"]],
+["Yemek",["Aş"]],
+["Yetenek",["Kabiliyet"]],
+["Yıl",["Sene"]],
+["Yurt",["Vatan"]],
+["Zaman",["Vakit"]],
+["Zayıf",["Cılız"]],
+["Zelzele",["Deprem"]]
+];
+
+let aktifListe = [...tumKelimeler];
+let aktifKelime;
+let yanlislar = [];
+let puan = 0;
+let yanlis = 0;
+
+// 🔤 HARFLER
+const harfler = "ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ";
+
+harfler.split("").forEach(harf => {
+    let btn = document.createElement("button");
+    btn.innerText = harf;
+    btn.onclick = () => harfFiltrele(harf);
+    document.getElementById("harfler").appendChild(btn);
+});
+
+// TÜMÜ
+let tumBtn = document.createElement("button");
+tumBtn.innerText = "Tümü";
+tumBtn.onclick = () => {
+    aktifListe = [...tumKelimeler];
+    yeniKelime();
+};
+document.getElementById("harfler").appendChild(tumBtn);
+
+function harfFiltrele(harf) {
+    aktifListe = tumKelimeler.filter(k =>
+        k[0].toUpperCase().startsWith(harf)
+    );
+    yeniKelime();
+}
+
+function yeniKelime() {
+    aktifKelime = aktifListe[Math.floor(Math.random()*aktifListe.length)];
+    document.getElementById("kelime").innerText = aktifKelime[0];
+    document.getElementById("cevap").innerText = "";
+}
+
+// 🔊 SES
+function kelimeOku() {
+    let ses = new SpeechSynthesisUtterance(aktifKelime[0]);
+    ses.lang = "tr-TR";
+    speechSynthesis.speak(ses);
+}
+
+// 🎤 SESLE CEVAP (çoklu doğru kontrol)
+function konus() {
+    let rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    rec.lang = "tr-TR";
+    rec.start();
+
+    rec.onresult = function(e) {
+        let cevap = e.results[0][0].transcript.toLowerCase();
+
+        let dogruMu = aktifKelime[1].some(d =>
+            cevap.includes(d.toLowerCase())
+        );
+
+        if (dogruMu) {
+            alert("Doğru 🎉");
+            dogru();
+        } else {
+            alert("Yanlış ❌");
+            yanlisCevap();
+        }
+    };
+}
+
+function cevapGoster() {
+    document.getElementById("cevap").innerText = aktifKelime[1].join(" / ");
+}
+
+function dogru() {
+    puan++;
+    guncelle();
+    yeniKelime();
+}
+
+function yanlisCevap() {
+    yanlis++;
+    yanlislar.push(aktifKelime);
+    guncelle();
+    yeniKelime();
+}
+
+function tekrarModu() {
+    if (yanlislar.length === 0) {
+        alert("Yanlış yok 👌");
+        return;
+    }
+    aktifListe = [...yanlislar];
+    yeniKelime();
+}
+
+function guncelle() {
+    document.getElementById("puan").innerText = puan;
+    document.getElementById("yanlis").innerText = yanlis;
+}
+
+// 🎯 SEVİYE
+function seviyeAyarla(seviye) {
+    if(seviye === "kolay") aktifListe = tumKelimeler.slice(0,20);
+    else if(seviye === "orta") aktifListe = tumKelimeler.slice(0,50);
+    else aktifListe = [...tumKelimeler];
+
+    yeniKelime();
+}
+
+yeniKelime();
+
+</script>
+<button onclick="yeniKelime()" class="buyukButon">➡️ Sonraki Kelime</button>
+</body>
+</html>
