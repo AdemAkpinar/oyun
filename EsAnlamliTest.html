@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Eş Anlamlı Quiz</title>
+<style>
+body {
+    font-family: Arial;
+    text-align: center;
+    background: #f0f8ff;
+    padding: 20px;
+}
+.soru {
+    font-size: 32px;
+    margin: 30px;
+    font-weight: bold;
+}
+button {
+    display: block;
+    margin: 10px auto;
+    padding: 12px;
+    width: 200px;
+    font-size: 18px;
+}
+.skor {
+    font-size: 20px;
+}
+</style>
+</head>
+
+<body>
+
+<h2>Eş Anlamlı Kelime Quiz 🎯</h2>
+
+<div class="skor">
+⭐ Puan: <span id="puan">0</span>
+</div>
+
+<div class="soru" id="soru"></div>
+
+<div id="secenekler"></div>
+
+<script>
+const kelimeler = [
+["Acemi","Toy"],["Ad","İsim"],["Akıllı","Uslu"],["Amaç","Gaye"],
+["Anı","Hatıra"],["Armağan","Hediye"],["Basit","Kolay"],
+["Cevap","Yanıt"],["Dert","Üzüntü"],["Doğa","Tabiat"],
+["Doktor","Hekim"],["Ev","Konut"],["Fakir","Yoksul"],
+["Kalp","Yürek"],["Okul","Mektep"],["Özgürlük","Hürriyet"],
+["Savaş","Harp"],["Ulus","Millet"],["Zaman","Vakit"]
+];
+
+let puan = 0;
+let dogruCevap = "";
+
+function yeniSoru() {
+    let soru = kelimeler[Math.floor(Math.random()*kelimeler.length)];
+    dogruCevap = soru[1];
+
+    document.getElementById("soru").innerText = soru[0];
+
+    let secenekler = [dogruCevap];
+
+    while(secenekler.length < 4) {
+        let rastgele = kelimeler[Math.floor(Math.random()*kelimeler.length)][1];
+        if(!secenekler.includes(rastgele)) {
+            secenekler.push(rastgele);
+        }
+    }
+
+    secenekler.sort(() => Math.random() - 0.5);
+
+    let alan = document.getElementById("secenekler");
+    alan.innerHTML = "";
+
+    secenekler.forEach(sec => {
+        let btn = document.createElement("button");
+        btn.innerText = sec;
+        btn.onclick = () => cevapKontrol(sec);
+        alan.appendChild(btn);
+    });
+}
+
+function cevapKontrol(secim) {
+    if(secim === dogruCevap) {
+        alert("Doğru 🎉");
+        puan++;
+    } else {
+        alert("Yanlış ❌ Doğru: " + dogruCevap);
+    }
+    document.getElementById("puan").innerText = puan;
+    yeniSoru();
+}
+
+yeniSoru();
+</script>
+
+</body>
+</html>
