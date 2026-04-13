@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Soru Cevap Oyunu</title>
+<style>
+body {font-family: Arial; text-align:center; background:#f4f4f4;}
+.container {max-width:700px; margin:auto; background:white; padding:20px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.2);} 
+button {margin:5px; padding:12px 18px; font-size:16px; border:none; border-radius:8px; cursor:pointer; color:white;} 
+.row {margin-top:10px;} 
+.blue {background:#3498db;} 
+.yellow {background:#f1c40f; color:black;} 
+.green {background:#2ecc71;} 
+.gray {background:#7f8c8d;}
+#answer {display:none; margin-top:10px; font-weight:bold;}
+#question {font-size:24px; font-weight:bold; padding:20px; border-radius:10px; background:#e8f4ff; color:#2c3e50; margin:15px 0;}
+</style>
+</head>
+<body>
+<div class="container">
+<h2>Soru Cevap Oyunu</h2>
+<p id="score">⭐ 0</p>
+<p id="wrongCount">Yanlış: 0</p>
+<p id="question"></p>
+<p id="answer"></p>
+
+<div class="row">
+<button class="blue" onclick="showAnswer()">Cevabı Göster</button>
+</div>
+
+<div class="row">
+<button class="yellow" onclick="mark(true)">Doğru</button>
+<button class="yellow" onclick="mark(false)">Yanlış</button>
+<button class="green" onclick="nextQuestion()">Sonraki Soru</button>
+</div>
+
+<div class="row">
+<button class="gray" onclick="randomQuestion()">Random Soru</button>
+<button class="gray" onclick="repeatWrong()">Yanlışları Tekrarla</button>
+</div>
+</div>
+
+<script>
+const data = [
+{q:"Fotosentez nedir?",a:"Bitkilerin güneş ışığını, suyu ve karbondioksiti kullanarak besin üretmesidir."},
+{q:"Fotosentez gece mi gündüz mü gerçekleşir?",a:"Gündüz gerçekleşir."},
+{q:"Mariana Çukuru nerededir?",a:"Pasifik Okyanusu'ndadır."},
+{q:"Hücre zarı ne işe yarar?",a:"Hücreyi korur ve madde alışverişini düzenler."},
+{q:"En büyük kara hayvanı nedir?",a:"Fildir."},
+{q:"Su kaç derecede donar?",a:"0 derecede donar."},
+{q:"Su kaç derecede kaynamaya başlar?",a:"100 derecede kaynar."},
+{q:"Ülkemiz hangi kıtada yer alır?",a:"Asya; bir kısmı Avrupa."},
+{q:"Dünyanın en büyük okyanusu hangisidir?",a:"Pasifik Okyanusu."},
+{q:"Türkiye'nin en kalabalık şehri hangisidir?",a:"İstanbul."},
+{q:"Kanımıza rengini veren madde nedir?",a:"Hemoglobin."},
+{q:"Türkiye'nin en büyük dağı hangisidir?",a:"Ağrı Dağı."},
+{q:"Kaç duyu organımız vardır?",a:"5"},
+{q:"Türkiye'nin en büyük gölü hangisidir?",a:"Van Gölü."},
+{q:"Atatürk hangi yılda doğdu?",a:"1881"},
+{q:"Dünyamızın etrafında döndüğü yıldız nedir?",a:"Güneş"},
+{q:"Türkiye'nin başkenti neresidir?",a:"Ankara"},
+{q:"Bayrağımızın renkleri?",a:"Kırmızı ve beyaz"},
+{q:"İstiklal Marşı'nın şairi kimdir?",a:"Mehmet Akif Ersoy"},
+{q:"Türkiye'nin milli marşı?",a:"İstiklal Marşı"},
+{q:"Dünyada kaç kıta vardır?",a:"7"},
+{q:"En büyük kıta hangisi?",a:"Asya"},
+{q:"Dünyanın en büyük hayvanı?",a:"Mavi balina"},
+{q:"Güneş gezegen midir?",a:"Hayır, yıldızdır"},
+{q:"Ay ışık verir mi?",a:"Hayır, yansıtır"},
+{q:"Kalp ne işe yarar?",a:"Kan pompalar"},
+{q:"Hangi gazı soluruz?",a:"Oksijen"},
+{q:"En yakın yıldız?",a:"Güneş"},
+{q:"Türkiye'nin güneyindeki deniz?",a:"Akdeniz"},
+{q:"Türkiye'nin batısındaki deniz?",a:"Ege"},
+{q:"Türkiye'nin kuzeyindeki deniz?",a:"Karadeniz"},
+{q:"En uzun nehir?",a:"Nil"},
+{q:"İstanbul hangi kıtalarda?",a:"Asya ve Avrupa"},
+{q:"Para birimimiz?",a:"Türk lirası"},
+{q:"Ülkemizin kurucusu?",a:"Mustafa Kemal Atatürk"},
+{q:"Güneş nereden doğar?",a:"Doğudan"},
+{q:"Güneş nereden batar?",a:"Batıdan"},
+{q:"Haftada kaç gün?",a:"7"},
+{q:"Kaç mevsim var?",a:"4"},
+{q:"İlkbahardan sonra?",a:"Yaz"},
+{q:"Kış nasıl olur?",a:"Soğuk"},
+{q:"Denizde yaşayan büyük memeli?",a:"Balina"},
+{q:"Uçan hayvan?",a:"Kuş"},
+{q:"Suda yaşayan hayvan?",a:"Balık"},
+{q:"Fransa'nın başkenti?",a:"Paris"},
+{q:"İngiltere'nin başkenti?",a:"Londra"},
+{q:"En büyük çöl?",a:"Sahra"},
+{q:"Kırmızı gezegen?",a:"Mars"},
+{q:"Beynin görevi?",a:"Vücudu yönetir"}
+];
+
+let index = 0;
+let wrong = [];
+let stars = 0;
+let wrongCount = 0;
+
+function loadQuestion() {
+ document.getElementById('question').innerText = data[index].q;
+ document.getElementById('answer').style.display = 'none';
+}
+
+function showAnswer() {
+ const ans = document.getElementById('answer');
+ ans.innerText = data[index].a;
+ ans.style.display = 'block';
+}
+
+function nextQuestion() {
+ index = (index + 1) % data.length;
+ loadQuestion();
+}
+
+function randomQuestion() {
+ index = Math.floor(Math.random() * data.length);
+ loadQuestion();
+}
+
+function mark(isCorrect) {
+ if (isCorrect) {
+   stars++;
+ } else {
+   wrong.push(index);
+   wrongCount++;
+ }
+ document.getElementById('score').innerText = "⭐ " + stars;
+ document.getElementById('wrongCount').innerText = "Yanlış: " + wrongCount;
+ nextQuestion();
+}
+
+function repeatWrong() {
+ if (wrong.length === 0) {alert("Yanlış yok!"); return;}
+ index = wrong.shift();
+ loadQuestion();
+}
+
+loadQuestion();
+</script>
+</body>
+</html>
