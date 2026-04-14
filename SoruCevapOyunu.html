@@ -12,9 +12,9 @@ button {margin:5px; padding:12px 18px; font-size:16px; border:none; border-radiu
 .blue {background:#3498db;} 
 .yellow {background:#f1c40f; color:black;} 
 .green {background:#2ecc71;} 
-.gray {background:#7f8c8d;}
-#answer {display:none; margin-top:10px; font-weight:bold;}
+.gray {background:#7f8c8d;} 
 #question {font-size:24px; font-weight:bold; padding:20px; border-radius:10px; background:#e8f4ff; color:#2c3e50; margin:15px 0;}
+#answer {display:none; margin-top:10px; font-weight:bold;}
 </style>
 </head>
 <body>
@@ -37,6 +37,9 @@ button {margin:5px; padding:12px 18px; font-size:16px; border:none; border-radiu
 
 <div class="row">
 <button class="gray" onclick="randomQuestion()">Random Soru</button>
+<input type="number" id="rangeInput" placeholder="Kaç soru?" min="1" style="padding:10px; width:120px; border-radius:5px; border:1px solid #ccc;">
+<button class="gray" onclick="randomCustom()">Aralıktan Random</button>
+<button class="gray" onclick="randomWrong()">Yanlışlardan Random</button>
 <button class="gray" onclick="repeatWrong()">Yanlışları Tekrarla</button>
 </div>
 </div>
@@ -99,9 +102,35 @@ let wrong = [];
 let stars = 0;
 let wrongCount = 0;
 
+const KEY_INDEX = 'quiz_index';
+const KEY_WRONG = 'quiz_wrong';
+const KEY_STARS = 'quiz_stars';
+const KEY_WRONGCOUNT = 'quiz_wrongcount';
+
+function saveState() {
+ localStorage.setItem(KEY_INDEX, index);
+ localStorage.setItem(KEY_WRONG, JSON.stringify(wrong));
+ localStorage.setItem(KEY_STARS, stars);
+ localStorage.setItem(KEY_WRONGCOUNT, wrongCount);
+}
+
+function loadState() {
+ const si = localStorage.getItem(KEY_INDEX);
+ const sw = localStorage.getItem(KEY_WRONG);
+ const ss = localStorage.getItem(KEY_STARS);
+ const swc = localStorage.getItem(KEY_WRONGCOUNT);
+ if (si !== null) index = parseInt(si);
+ if (sw) wrong = JSON.parse(sw);
+ if (ss !== null) stars = parseInt(ss);
+ if (swc !== null) wrongCount = parseInt(swc);
+ document.getElementById('score').innerText = "⭐ " + stars;
+ document.getElementById('wrongCount').innerText = "Yanlış: " + wrongCount;
+}
+
 function loadQuestion() {
  document.getElementById('question').innerText = data[index].q;
  document.getElementById('answer').style.display = 'none';
+ saveState();
 }
 
 function showAnswer() {
@@ -120,6 +149,14 @@ function randomQuestion() {
  loadQuestion();
 }
 
+function randomCustom() {
+ const val = parseInt(document.getElementById('rangeInput').value);
+ if (!val || val < 1) return alert("Geçerli sayı gir");
+ const limit = Math.min(val, data.length);
+ index = Math.floor(Math.random() * limit);
+ loadQuestion();
+}
+
 function mark(isCorrect) {
  if (isCorrect) {
    stars++;
@@ -133,11 +170,19 @@ function mark(isCorrect) {
 }
 
 function repeatWrong() {
- if (wrong.length === 0) {alert("Yanlış yok!"); return;}
+ if (wrong.length === 0) return alert("Yanlış yok!");
  index = wrong.shift();
  loadQuestion();
 }
 
+function randomWrong() {
+ if (wrong.length === 0) return alert("Yanlış yok!");
+ const i = Math.floor(Math.random() * wrong.length);
+ index = wrong[i];
+ loadQuestion();
+}
+
+loadState();
 loadQuestion();
 </script>
 </body>
